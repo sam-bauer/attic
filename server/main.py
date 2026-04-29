@@ -14,12 +14,14 @@ from services.open_mateo import get_last_24h_temps as get_weather_temps
 load_dotenv()
 
 CACHE_TTL = int(os.getenv("CACHE_TTL_SECONDS", "300"))
+_cors_env = os.getenv("CORS_ORIGINS", "*")
+CORS_ORIGINS = [o.strip() for o in _cors_env.split(",")] if _cors_env != "*" else ["*"]
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
     allow_methods=["GET"],
     allow_headers=["*"],
 )
