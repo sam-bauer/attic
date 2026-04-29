@@ -11,3 +11,7 @@ __pycache__/
 *.pyc
 server/.venv/
 server/.pytest_cache/
+
+# IDE
+.vscode/
+.claude/
