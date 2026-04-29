@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from threading import Lock
 
 import httpx
 
@@ -8,11 +9,20 @@ BASE_URL = "https://api.verkada.com"
 TOKEN_ENDPOINT = f"{BASE_URL}/token"
 DATA_ENDPOINT = f"{BASE_URL}/environment/v1/data"
 
+_token_cache: dict = {}
+_token_lock = Lock()
 
-def _get_token(api_key: str) -> str:
-    response = httpx.post(TOKEN_ENDPOINT, headers={"x-api-key": api_key}, timeout=10)
-    response.raise_for_status()
-    return response.json()["token"]
+
+def _get_token(api_key: str, force_refresh: bool = False) -> str:
+    with _token_lock:
+        cached = _token_cache.get(api_key)
+        if not force_refresh and cached:
+            return cached
+        response = httpx.post(TOKEN_ENDPOINT, headers={"x-api-key": api_key}, timeout=10)
+        response.raise_for_status()
+        token = response.json()["token"]
+        _token_cache[api_key] = token
+        return token
 
 
 def get_last_24h_temps(api_key: str, device_id: str) -> list[TempReading]:
@@ -36,6 +46,10 @@ def get_last_24h_temps(api_key: str, device_id: str) -> list[TempReading]:
             params["page_token"] = page_token
 
         response = httpx.get(DATA_ENDPOINT, headers=headers, params=params, timeout=10)
+        if response.status_code == 401:
+            token = _get_token(api_key, force_refresh=True)
+            headers = {"x-verkada-auth": token}
+            response = httpx.get(DATA_ENDPOINT, headers=headers, params=params, timeout=10)
         response.raise_for_status()
         data = response.json()
 
