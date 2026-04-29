@@ -102,7 +102,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
     logging.exception("Unhandled error on %s", request.url.path)
-    return JSONResponse({"detail": str(exc)}, status_code=502, headers=_cors_header(request))
+    return JSONResponse({"detail": str(exc)}, status_code=500, headers=_cors_header(request))
 
 
 @app.get("/data", response_model=ChartResponse)
