@@ -10,7 +10,7 @@ DATA_ENDPOINT = f"{BASE_URL}/environment/v1/data"
 
 
 def _get_token(api_key: str) -> str:
-    response = httpx.post(TOKEN_ENDPOINT, headers={"x-api-key": api_key})
+    response = httpx.post(TOKEN_ENDPOINT, headers={"x-api-key": api_key}, timeout=10)
     response.raise_for_status()
     return response.json()["token"]
 
@@ -35,7 +35,7 @@ def get_last_24h_temps(api_key: str, device_id: str) -> list[TempReading]:
         if page_token:
             params["page_token"] = page_token
 
-        response = httpx.get(DATA_ENDPOINT, headers=headers, params=params)
+        response = httpx.get(DATA_ENDPOINT, headers=headers, params=params, timeout=10)
         response.raise_for_status()
         data = response.json()
 

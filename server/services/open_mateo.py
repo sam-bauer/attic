@@ -20,7 +20,7 @@ def get_last_24h_temps(latitude: float, longitude: float) -> list[TempReading]:
         "timezone": "UTC",
     }
 
-    response = httpx.get(BASE_URL, params=params)
+    response = httpx.get(BASE_URL, params=params, timeout=10)
     response.raise_for_status()
     data = response.json()
 

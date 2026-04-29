@@ -1,11 +1,13 @@
+import logging
 import os
 import time
 from datetime import datetime, timezone
 from threading import Lock
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from services.command import get_last_24h_temps as get_sensor_temps
@@ -81,12 +83,31 @@ def _get_cached() -> ChartResponse:
         return result
 
 
+def _cors_header(request: Request) -> dict:
+    origin = request.headers.get("origin", "")
+    if not origin:
+        return {}
+    if CORS_ORIGINS == ["*"] or origin in CORS_ORIGINS:
+        return {"access-control-allow-origin": "*" if CORS_ORIGINS == ["*"] else origin}
+    return {}
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    if exc.status_code >= 500:
+        logging.exception(exc.detail)
+    return JSONResponse({"detail": exc.detail}, status_code=exc.status_code, headers=_cors_header(request))
+
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    logging.exception("Unhandled error on %s", request.url.path)
+    return JSONResponse({"detail": str(exc)}, status_code=502, headers=_cors_header(request))
+
+
 @app.get("/data", response_model=ChartResponse)
 def read_data():
-    try:
-        return _get_cached()
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=str(e))
+    return _get_cached()
 
 
 @app.get("/health")
