@@ -19,7 +19,6 @@ def _get_token(api_key: str, force_refresh: bool = False) -> str:
         if not force_refresh and cached:
             return cached
         response = httpx.post(TOKEN_ENDPOINT, headers={"x-api-key": api_key}, timeout=10)
-        print(f"VERKADA_TOKEN status={response.status_code} body={response.text!r}", flush=True)
         response.raise_for_status()
         token = response.json()["token"]
         _token_cache[api_key] = token

@@ -28,6 +28,13 @@
       </div>
 
       <Line :data="chartData" :options="chartOptions" />
+      <div class="camera-wrap">
+        <iframe
+          src="https://vauth.command.verkada.com/__v/bens-spyware/embed/html/f2db838e-fd72-4a89-9cd8-9a496bba0ace/"
+          frameborder="0"
+          allowfullscreen
+        ></iframe>
+      </div>
       <p class="footer">Updated {{ cachedAt }}</p>
     </template>
   </div>
@@ -369,6 +376,20 @@ h1 {
 }
 
 .status.error { color: #ef4444; }
+
+.camera-wrap {
+  margin-top: 2rem;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  aspect-ratio: 4 / 3;
+}
+
+.camera-wrap iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
 
 .footer {
   margin-top: 0.75rem;
