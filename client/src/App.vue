@@ -1,7 +1,7 @@
 <template>
   <div class="wrap">
     <header>
-      <h1>Monitoring the Attic Temperature </h1>
+      <h1>Monitoring the Attic</h1>
       <span v-if="sensorStale" class="offline-badge">Sensor offline</span>
       <div class="unit-toggle" role="group" aria-label="Temperature unit">
         <button type="button" :class="{ active: unit === 'F' }" @click="unit = 'F'">°F</button>
